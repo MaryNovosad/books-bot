@@ -1,0 +1,50 @@
+﻿{
+  "authors": [
+    {
+      "name": "Joan Rowling",
+      "books": [
+        {
+          "name": "Harry Potter and philosopher stone",
+          "rate": 4.5,
+          "Genres": [ "Fantasy" ]
+        },
+        {
+          "name": "Harry Potter and the Prisoner of Azkaban.",
+          "rate": 3.7,
+          "Genres": [ "Fantasy" ]
+        },
+        {
+          "name": "Harry Potter and the Chamber of Secrets",
+          "rate": 3.9,
+          "Genres": [ "Fantasy" ]
+        },
+        {
+          "name": "Harry Potter and the Goblet of Fire.",
+          "rate": 4.6,
+          "Genres": [ "Fantasy" ]
+        },
+        {
+          "name": "Harry Potter and the Order of the Phoenix.",
+          "rate": 5,
+          "Genres": [ "Fantasy" ]
+        }
+
+      ]
+    },
+    {
+      "name": "Oscar Wilde",
+      "books": [
+        {
+          "name": "The Picture of Dorian Gray",
+          "rate": 4.8,
+          "Genres": [ "Mystery" ]
+        },
+        {
+          "name": "Intentions",
+          "rate": 4.1,
+          "Genres": [ "Drama" ]
+        }
+      ]
+    }
+  ]
+}
