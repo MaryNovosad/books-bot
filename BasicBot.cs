@@ -46,6 +46,7 @@ namespace Microsoft.BotBuilderSamples
         private readonly BotServices _services;
         private readonly DataBase _database;
         private readonly BookService _bookService;
+        private readonly PrologEngine _prologEngine;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BasicBot"/> class.
@@ -72,6 +73,8 @@ namespace Microsoft.BotBuilderSamples
 
             _database = JsonConvert.DeserializeObject<DataBase>(File.ReadAllText("database.json"));
             _bookService = new BookService(_database);
+            _prologEngine = new PrologEngine(persistentCommandHistory: false);
+            _prologEngine.Consult("db.pl");
         }
 
         private DialogSet Dialogs { get; set; }
@@ -84,18 +87,6 @@ namespace Microsoft.BotBuilderSamples
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OnTurnAsync(ITurnContext turnContext, CancellationToken cancellationToken)
         {
-            /* Prolog nuget package simple test
-            var prolog = new PrologEngine(persistentCommandHistory: false);
-
-            // 'socrates' is human.
-            prolog.ConsultFromString("human(socrates).");
-            // human is bound to die.
-            prolog.ConsultFromString("mortal(X) :- human(X).");
-
-            // Question: Shall 'socrates' die?
-            var solution = prolog.GetFirstSolution(query: "mortal(socrates).");
-            Console.WriteLine(solution.Solved); // = "True" (Yes!) */
-
             var activity = turnContext.Activity;
 
             // Create a dialog context
@@ -145,9 +136,28 @@ namespace Microsoft.BotBuilderSamples
                                     var ent = luisResults.Entities["AuthorName"];
                                     if(ent != null)
                                     {
-                                        var books = _bookService.GetAuthorsBooks(ent.First().ToString());
-                                        var message = books != null ? $"{ent.First().ToString()} wrote such books: \n {string.Join("\n ", books)}"
-                                            : "This author is missing in the database. Please, connect bot to Internet.";
+                                        var author = ent.First().ToString();
+                                        var message = string.Empty;
+                                        var solutions = _prologEngine.GetAllSolutions(null, $"book(B, \"{author}\").");
+                                        if (solutions.Success)
+                                        {
+                                            message += $"{author} wrote such books: ";
+                                            foreach (Solution s in solutions.NextSolution)
+                                            {
+                                                foreach (Variable v in s.NextVariable)
+                                                {
+                                                    if(v.Type != "namedvar")
+                                                    {
+                                                        message += $"\n {v.Value}";
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            message = "This author is missing in the database. Please, connect bot to Internet.";
+                                        }
+
                                         await turnContext.SendActivityAsync(message);
                                     }
                                     else
