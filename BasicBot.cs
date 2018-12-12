@@ -46,7 +46,8 @@ namespace Microsoft.BotBuilderSamples
         private readonly BotServices _services;
         private readonly DataBase _database;
         private readonly BookService _bookService;
-        private readonly PrologEngine _prologEngine;
+        private readonly PrologBookService _prologBookService;
+        private PrologEngine _prologEngine;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BasicBot"/> class.
@@ -75,6 +76,7 @@ namespace Microsoft.BotBuilderSamples
             _bookService = new BookService(_database);
             _prologEngine = new PrologEngine(persistentCommandHistory: false);
             _prologEngine.Consult("db.pl");
+            _prologBookService = new PrologBookService(_prologEngine);
         }
 
         private DialogSet Dialogs { get; set; }
@@ -167,7 +169,7 @@ namespace Microsoft.BotBuilderSamples
                                     break;
                                 case AskToRecommendBook:
                                     luisResults.Entities.TryGetValue("Genre", out var genre);
-                                    await turnContext.SendActivityAsync(_bookService.RecommendBook(genre?.First().First().ToString()));
+                                    await turnContext.SendActivityAsync(_prologBookService.RecommendBook(genre?.First().First().ToString()));
                                     break;
                                 case TellAuthorOfSpecificBook:
                                     var bookname = luisResults.Entities["BookName"].First().ToString();
