@@ -7,4 +7,14 @@ book("Harry Potter and the Order of the Phoenix.", "joan rowling").
 book("The Picture of Dorian Gray", "oscar wilde").
 book("Intentions", "oscar wilde").
 
+genre("Fantasy").
+genre("Horror").
+genre("Science").
+genre("Adventure").
+genre("Poetry").
+genre("History").
+genre("Comics").
+genre("Romance").
+genre("Drama").
+genre("Psychology").
 

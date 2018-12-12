@@ -178,12 +178,28 @@ namespace Microsoft.BotBuilderSamples
                                     await turnContext.SendActivityAsync(response);
                                     break;
                                 case TellGenresOfBooks:
-                                    var genres = "These are different book genres: \n Science, \n Drama, \n Romance, \n Mystery, \n Horror, \n Health \n" +
-                                        "Guide, \n Travel, \n Children's, \n Religion, \n Science, \n " +
-                                        "History, \n Anthology,\n Poetry,\n Encyclopedias,\n" +
-                                        "Dictionaries,\n Comics,\n Art,\n Cookbook \n";
+                                    var bookGenresMessage = "These are different book genres: ";
+                                    var genres = _prologEngine.GetAllSolutions(null, $"genre(G).");
+                                    if (genres.Success)
+                                    {
+                                        foreach (Solution s in genres.NextSolution)
+                                        {
+                                            foreach (Variable v in s.NextVariable)
+                                            {
+                                                if (v.Type != "namedvar")
+                                                {
+                                                    bookGenresMessage += $"\n {v.Value}";
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        bookGenresMessage = "Sorry, I can't tell you about book genres. Please, connect bot to Internet.";
+                                    }
 
-                                    await turnContext.SendActivityAsync(genres);
+                                    await turnContext.SendActivityAsync(bookGenresMessage);
+
                                     break;
 
                                 case None:
