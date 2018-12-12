@@ -1,11 +1,13 @@
-book("Harry Potter and philosopher stone", "joan rowling", 4, "Fantasy").
-book("Harry Potter and the Prisoner of Azkaban.", "joan rowling", 3.7, "Fantasy").
-book("Harry Potter and the Chamber of Secrets", "joan rowling", 4.5, "Fantasy").
-book("Harry Potter and the Goblet of Fire.", "joan rowling", 4.8, "Fantasy").
-book("Harry Potter and the Order of the Phoenix.", "joan rowling", 5, "Fantasy").
+book("harry potter and philosopher stone", "joan rowling", 4, "Fantasy").
+book("harry potter and the prisoner of azkaban.", "joan rowling", 3, "Fantasy").
+book("harry potter and the chamber of secrets", "joan rowling", 5, "Fantasy").
+book("harry potter and the goblet of fire.", "joan rowling", 1, "Fantasy").
+book("harry potter and the order of the phoenix.", "joan rowling", 2, "Fantasy").
 
-book("The Picture of Dorian Gray", "oscar wilde", 4.2, "Mystery").
-book("Intentions", "oscar wilde", 3.3, "Drama").
+book("the picture of dorian gray", "oscar wilde", 8, "Mystery").
+book("murder in the library", "agata kristi", 9, "Mystery").
+book("intentions", "oscar wilde", 7, "Drama").
+book("intentions 2", "oscar wilde", 8, "Drama").
 
 genre("Fantasy").
 genre("Horror").

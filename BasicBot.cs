@@ -172,8 +172,8 @@ namespace Microsoft.BotBuilderSamples
                                     await turnContext.SendActivityAsync(_prologBookService.RecommendBook(genre?.First().First().ToString()));
                                     break;
                                 case TellAuthorOfSpecificBook:
-                                    var bookname = luisResults.Entities["BookName"].First().ToString();
-                                    var authorname = _bookService.GetAuthorOfTheBookName(bookname);
+                                    var bookname = luisResults.Entities["BookName"].First().ToString().Trim('\'');
+                                    var authorname = _prologBookService.GetAuthorOfTheBookName(bookname);
                                     var response = string.IsNullOrEmpty(authorname)
                                         ? "There is no such book in the database. \n Please, connect bot to the Internet."
                                         : $"{authorname} wrote book {bookname}";

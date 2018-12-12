@@ -12,6 +12,13 @@ namespace BasicBot.Services
             _prologEngine = prologEngine;
         }
 
+        public string GetAuthorOfTheBookName(string bookName)
+        {
+            var solutions = _prologEngine.GetAllSolutions(null, $"book(\"{bookName}\", Author, Rate, Genre).");
+            var solution = solutions.NextSolution.FirstOrDefault();
+            return GetVariableByName(solution, "Author");
+        }
+
         public string RecommendBook(string genre = null)
         {
             SolutionSet solutions;
@@ -26,8 +33,10 @@ namespace BasicBot.Services
 
             if (solutions.Success)
             {
-                var max = solutions.NextSolution.Max(s => double.Parse(GetVariableByName(s, "Rate")));
-                var recommendation = solutions.NextSolution.FirstOrDefault(s => double.Parse(GetVariableByName(s, "Rate")) == max);
+                var amount = solutions.NextSolution.Count() == 1 ? 1 : solutions.NextSolution.Count() - 1;
+                var max = solutions.NextSolution.Take(amount)
+                    .Max(s => int.Parse(GetVariableByName(s, "Rate")));
+                var recommendation = solutions.NextSolution.Take(amount).FirstOrDefault(s => int.Parse(GetVariableByName(s, "Rate")) == max);
                 return $"I recommend you such book: \n Name: '{GetVariableByName(recommendation, "BookName")}' \n " +
                         $"Author: {GetVariableByName(recommendation, "BookAuthor")} \n Rate: {GetVariableByName(recommendation, "Rate")}";
             }
@@ -40,7 +49,8 @@ namespace BasicBot.Services
 
         private string GetVariableByName(Solution solution, string name)
         {
-            return solution.NextVariable.FirstOrDefault(v => v.Name == name)?.Value;
+            var result = solution.NextVariable.FirstOrDefault(v => v.Name == name)?.Value;
+            return result;
         }
     }
 }
