@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BasicBot.Database;
 using BasicBot.Services;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
@@ -44,8 +43,6 @@ namespace Microsoft.BotBuilderSamples
         private readonly UserState _userState;
         private readonly ConversationState _conversationState;
         private readonly BotServices _services;
-        private readonly DataBase _database;
-        private readonly BookService _bookService;
         private readonly PrologBookService _prologBookService;
         private PrologEngine _prologEngine;
 
@@ -72,8 +69,6 @@ namespace Microsoft.BotBuilderSamples
             Dialogs = new DialogSet(_dialogStateAccessor);
             Dialogs.Add(new GreetingDialog(_greetingStateAccessor, loggerFactory));
 
-            _database = JsonConvert.DeserializeObject<DataBase>(File.ReadAllText("database.json"));
-            _bookService = new BookService(_database);
             _prologEngine = new PrologEngine(persistentCommandHistory: false);
             _prologEngine.Consult("db.pl");
             _prologBookService = new PrologBookService(_prologEngine);
