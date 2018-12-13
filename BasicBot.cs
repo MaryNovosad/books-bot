@@ -31,6 +31,8 @@ namespace Microsoft.BotBuilderSamples
         public const string TellAuthorOfSpecificBook = "TellAuthorOfSpecificBook";
         public const string TellAuthorsBooks = "TellAuthorsBooks";
         public const string TellGenresOfBooks = "TellGenresOfBooks";
+        public const string TellIfBookIsWorthReading = "TellIfBookIsWorthReading";
+
 
         /// <summary>
         /// Key in the bot config (.bot file) for the LUIS instance.
@@ -198,7 +200,19 @@ namespace Microsoft.BotBuilderSamples
                                     await turnContext.SendActivityAsync(bookGenresMessage);
 
                                     break;
+                                case TellIfBookIsWorthReading:
+                                    var book = luisResults.Entities["BookName"].First().ToString().Replace('\'', '\"');
+                                    var bookIsWorthReading = _prologEngine.GetFirstSolution($"bookIsWorthReading({book}).");
+                                    if(bookIsWorthReading.Solved)
+                                    {
+                                        await turnContext.SendActivityAsync("I definitely recommend you this book! It's rate is pretty high.");
+                                    }
+                                    else
+                                    {
+                                        await turnContext.SendActivityAsync("I do not recommend you this book. Based on it's rate I can say that many people were disappointed.");
+                                    }
 
+                                    break;
                                 case None:
                                 default:
                                     await dc.Context.SendActivityAsync("I didn't understand what you just said to me.");

@@ -22,3 +22,11 @@ genre("Psychology").
 
 likes("Anna", "Fantasy").
 likes("Mary", "Mystery").
+
+bookIsWorthReading(Book) :-
+	book(Book, _, Rate, _),
+	Rate > 5.
+
+
+
+
