@@ -20,13 +20,25 @@ genre("Romance").
 genre("Drama").
 genre("Psychology").
 
-likes("Anna", "Fantasy").
-likes("Mary", "Mystery").
+bookIsPopular(Rate) :-
+Rate > 8.
+
+bookIsSlightlyPopular(Rate) :-
+(Rate > 4, Rate < 8).
+
+bookIsNotPopular(Rate) :-
+Rate < 5.
 
 bookIsWorthReading(Book) :-
 	book(Book, _, Rate, _),
-	Rate > 5.
+	(bookIsSlightlyPopular(Rate); bookIsPopular(Rate)).
 
+authorIsWorldFamous(Author) :-
+	book(_,Author, Rate, _),
+	bookIsPopular(Rate).
 
+likes("Anna", "Fantasy").
+likes("Mary", "Mystery").
 
-
+likes("Iryna", "Fantasy").
+likes("Inna", "Drama").

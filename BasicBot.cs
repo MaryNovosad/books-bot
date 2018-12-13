@@ -31,8 +31,8 @@ namespace Microsoft.BotBuilderSamples
         public const string TellAuthorOfSpecificBook = "TellAuthorOfSpecificBook";
         public const string TellAuthorsBooks = "TellAuthorsBooks";
         public const string TellGenresOfBooks = "TellGenresOfBooks";
-        public const string TellIfBookIsWorthReading = "TellIfBookIsWorthReading";
-
+        public const string TellIfBookIsWorthReading = "TellIfBookIsWorthReading"; 
+        public const string TellIfAuthorIsVeryFamous = "TellIfAuthorIsVeryFamous";
 
         /// <summary>
         /// Key in the bot config (.bot file) for the LUIS instance.
@@ -137,7 +137,7 @@ namespace Microsoft.BotBuilderSamples
                                     {
                                         var author = ent.First().ToString();
                                         var message = string.Empty;
-                                        var solutions = _prologEngine.GetAllSolutions(null, $"book(B, \"{author}\").");
+                                        var solutions = _prologEngine.GetAllSolutions(null, $"book(B, \"{author}\", _, _).");
                                         if (solutions.Success)
                                         {
                                             message += $"{author} wrote such books: ";
@@ -212,6 +212,18 @@ namespace Microsoft.BotBuilderSamples
                                         await turnContext.SendActivityAsync("I do not recommend you this book. Based on it's rate I can say that many people were disappointed.");
                                     }
 
+                                    break;
+                                case TellIfAuthorIsVeryFamous:
+                                    var name = luisResults.Entities["AuthorName"].First().ToString();
+                                    var authorIsFamous = _prologEngine.GetFirstSolution($"authorIsWorldFamous({name}).");
+                                    if (authorIsFamous.Solved)
+                                    {
+                                        await turnContext.SendActivityAsync($"{name} is very famous all around the world. You should definitely get acquinted with his/her books.");
+                                    }
+                                    else
+                                    {
+                                        await turnContext.SendActivityAsync($"No, {name} is not very famous.");
+                                    }
                                     break;
                                 case None:
                                 default:
