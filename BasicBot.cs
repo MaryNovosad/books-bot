@@ -127,7 +127,7 @@ namespace Microsoft.BotBuilderSamples
                             switch (topIntent)
                             {
                                 case SayHello:
-                                    await turnContext.SendActivityAsync("Hello, I am you Book Advisor and I can't wait to help you!");
+                                    await dc.BeginDialogAsync(nameof(GreetingDialog));
                                     break;
                                 case TellAuthorsBooks:
                                     var ent = luisResults.Entities["AuthorName"];
@@ -330,13 +330,13 @@ namespace Microsoft.BotBuilderSamples
                     }
                 }
 
-                foreach (var city in userLocationEntities)
+                foreach (var genre in userLocationEntities)
                 {
-                    if (entities[city] != null)
+                    if (entities[genre] != null)
                     {
-                        // Capitalize and set new city.
-                        var newCity = (string)entities[city][0];
-                        greetingState.City = char.ToUpper(newCity[0]) + newCity.Substring(1);
+                        // Capitalize and set new genre.
+                        var newGenre = (string)entities[genre][0];
+                        greetingState.Genre = char.ToUpper(newGenre[0]) + newGenre.Substring(1);
                         break;
                     }
                 }

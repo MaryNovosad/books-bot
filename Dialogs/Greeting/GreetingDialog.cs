@@ -4,10 +4,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using BasicBot.Services;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
+using Prolog;
 
 namespace Microsoft.BotBuilderSamples
 {
@@ -23,18 +25,20 @@ namespace Microsoft.BotBuilderSamples
         // User state for greeting dialog
         private const string GreetingStateProperty = "greetingState";
         private const string NameValue = "greetingName";
-        private const string CityValue = "greetingCity";
+        private const string GenreValue = "greetingGenre";
 
         // Prompts names
         private const string NamePrompt = "namePrompt";
-        private const string CityPrompt = "cityPrompt";
+        private const string GenrePrompt = "genrePrompt";
 
         // Minimum length requirements for city and name
         private const int NameLengthMinValue = 3;
-        private const int CityLengthMinValue = 5;
 
         // Dialog IDs
         private const string ProfileDialog = "profileDialog";
+
+        private readonly PrologBookService _prologBookService;
+        private PrologEngine _prologEngine;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GreetingDialog"/> class.
@@ -52,12 +56,16 @@ namespace Microsoft.BotBuilderSamples
             {
                     InitializeStateStepAsync,
                     PromptForNameStepAsync,
-                    PromptForCityStepAsync,
+                    PromptForGenreStepAsync,
                     DisplayGreetingStateStepAsync,
             };
             AddDialog(new WaterfallDialog(ProfileDialog, waterfallSteps));
             AddDialog(new TextPrompt(NamePrompt, ValidateName));
-            AddDialog(new TextPrompt(CityPrompt, ValidateCity));
+            AddDialog(new TextPrompt(GenrePrompt, ValidateGenre));
+
+            _prologEngine = new PrologEngine(persistentCommandHistory: false);
+            _prologEngine.Consult("db.pl");
+            _prologBookService = new PrologBookService(_prologEngine);
         }
 
         public IStatePropertyAccessor<GreetingState> UserProfileAccessor { get; }
@@ -88,7 +96,7 @@ namespace Microsoft.BotBuilderSamples
             var greetingState = await UserProfileAccessor.GetAsync(stepContext.Context);
 
             // if we have everything we need, greet user and return.
-            if (greetingState != null && !string.IsNullOrWhiteSpace(greetingState.Name) && !string.IsNullOrWhiteSpace(greetingState.City))
+            if (greetingState != null && !string.IsNullOrWhiteSpace(greetingState.Name) && !string.IsNullOrWhiteSpace(greetingState.Genre))
             {
                 return await GreetUser(stepContext);
             }
@@ -101,7 +109,7 @@ namespace Microsoft.BotBuilderSamples
                     Prompt = new Activity
                     {
                         Type = ActivityTypes.Message,
-                        Text = "What is your name?",
+                        Text = "Hello! What is your name?",
                     },
                 };
                 return await stepContext.PromptAsync(NamePrompt, opts);
@@ -112,7 +120,7 @@ namespace Microsoft.BotBuilderSamples
             }
         }
 
-        private async Task<DialogTurnResult> PromptForCityStepAsync(
+        private async Task<DialogTurnResult> PromptForGenreStepAsync(
                                                         WaterfallStepContext stepContext,
                                                         CancellationToken cancellationToken)
         {
@@ -126,17 +134,17 @@ namespace Microsoft.BotBuilderSamples
                 await UserProfileAccessor.SetAsync(stepContext.Context, greetingState);
             }
 
-            if (string.IsNullOrWhiteSpace(greetingState.City))
+            if (string.IsNullOrWhiteSpace(greetingState.Genre))
             {
                 var opts = new PromptOptions
                 {
                     Prompt = new Activity
                     {
                         Type = ActivityTypes.Message,
-                        Text = $"Hello {greetingState.Name}, what city do you live in?",
+                        Text = $"Nice to meet you, {greetingState.Name}! What is your favorite book genre?",
                     },
                 };
-                return await stepContext.PromptAsync(CityPrompt, opts);
+                return await stepContext.PromptAsync(GenrePrompt, opts);
             }
             else
             {
@@ -148,15 +156,15 @@ namespace Microsoft.BotBuilderSamples
                                                     WaterfallStepContext stepContext,
                                                     CancellationToken cancellationToken)
         {
-            // Save city, if prompted.
+            // Save genre, if prompted.
             var greetingState = await UserProfileAccessor.GetAsync(stepContext.Context);
 
-            var lowerCaseCity = stepContext.Result as string;
-            if (string.IsNullOrWhiteSpace(greetingState.City) &&
-                !string.IsNullOrWhiteSpace(lowerCaseCity))
+            var lowerCaseGenre = stepContext.Result as string;
+            if (string.IsNullOrWhiteSpace(greetingState.Genre) &&
+                !string.IsNullOrWhiteSpace(lowerCaseGenre))
             {
                 // capitalize and set city
-                greetingState.City = char.ToUpper(lowerCaseCity[0]) + lowerCaseCity.Substring(1);
+                greetingState.Genre = char.ToUpper(lowerCaseGenre[0]) + lowerCaseGenre.Substring(1);
                 await UserProfileAccessor.SetAsync(stepContext.Context, greetingState);
             }
 
@@ -186,25 +194,17 @@ namespace Microsoft.BotBuilderSamples
             }
         }
 
-        /// <summary>
-        /// Validator function to verify if city meets required constraints.
-        /// </summary>
-        /// <param name="promptContext">Context for this prompt.</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used by other objects
-        /// or threads to receive notice of cancellation.</param>
-        /// <returns>A <see cref="Task"/> that represents the work queued to execute.</returns>
-        private async Task<bool> ValidateCity(PromptValidatorContext<string> promptContext, CancellationToken cancellationToken)
+        private async Task<bool> ValidateGenre(PromptValidatorContext<string> promptContext, CancellationToken cancellationToken)
         {
-            // Validate that the user entered a minimum lenght for their name
             var value = promptContext.Recognized.Value?.Trim() ?? string.Empty;
-            if (value.Length >= CityLengthMinValue)
+            if (value != null && !string.IsNullOrWhiteSpace(value))
             {
                 promptContext.Recognized.Value = value;
                 return true;
             }
             else
             {
-                await promptContext.Context.SendActivityAsync($"City names needs to be at least `{CityLengthMinValue}` characters long.");
+                await promptContext.Context.SendActivityAsync($"Genre name has to be string");
                 return false;
             }
         }
@@ -215,8 +215,10 @@ namespace Microsoft.BotBuilderSamples
             var context = stepContext.Context;
             var greetingState = await UserProfileAccessor.GetAsync(context);
 
+            var book = _prologBookService.RecommendBook(greetingState.Genre);
+
             // Display their profile information and end dialog.
-            await context.SendActivityAsync($"Hi {greetingState.Name}, from {greetingState.City}, nice to meet you!");
+            await context.SendActivityAsync($"Dear {greetingState.Name}, {book}");
             return await stepContext.EndDialogAsync();
         }
     }

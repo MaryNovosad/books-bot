@@ -9,7 +9,8 @@ namespace Microsoft.BotBuilderSamples
     public class GreetingState
     {
         public string Name { get; set; }
-
-        public string City { get; set; }
+        
+        public string Genre { get; set; }
+    
     }
 }
