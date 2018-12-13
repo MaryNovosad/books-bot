@@ -20,3 +20,5 @@ genre("Romance").
 genre("Drama").
 genre("Psychology").
 
+likes("Anna", "Fantasy").
+likes("Mary", "Mystery").

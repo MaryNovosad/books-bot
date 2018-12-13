@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using BasicBot.Services;
@@ -163,8 +164,20 @@ namespace Microsoft.BotBuilderSamples
             if (string.IsNullOrWhiteSpace(greetingState.Genre) &&
                 !string.IsNullOrWhiteSpace(lowerCaseGenre))
             {
-                // capitalize and set city
+                // capitalize and set genre to context
                 greetingState.Genre = char.ToUpper(lowerCaseGenre[0]) + lowerCaseGenre.Substring(1);
+
+                // save genre to prolog database
+                try
+                {
+                    File.AppendAllLines("db.pl", new[] { $"likes(\"{greetingState.Name}\", \"{greetingState.Genre}\")." });
+                }
+                catch (Exception e)
+                {
+
+                }
+                _prologEngine.Consult("db.pl");
+
                 await UserProfileAccessor.SetAsync(stepContext.Context, greetingState);
             }
 
