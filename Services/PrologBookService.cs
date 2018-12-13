@@ -46,6 +46,53 @@ namespace BasicBot.Services
             }
 
         }
+        
+        public string RecommendBookByPreference(string username = null)
+        {
+            var response = $"Sorry, couldn't find any books for {username}. Please connect bot to the Internet";
+            SolutionSet usersSolutions = new SolutionSet();
+            if (username != null)
+            {
+                var capitalizedName = char.ToUpper(username[0]) + username.Substring(1);
+                usersSolutions = _prologEngine.GetAllSolutions(null, $"likes(\"{capitalizedName}\", Genre).");
+            }
+
+            if (usersSolutions.Success)
+            {
+                var userPreferenceGenre = GetVariableByName(usersSolutions.NextSolution.First(), "Genre");
+
+                SolutionSet genreSolutions;
+                if (userPreferenceGenre != null)
+                {
+                    genreSolutions = _prologEngine.GetAllSolutions(null, $"book(BookName, BookAuthor, Rate, {userPreferenceGenre}).");
+
+                    if (genreSolutions.Success)
+                    {
+                        var amount = genreSolutions.NextSolution.Count() == 1 ? 1 : genreSolutions.NextSolution.Count() - 1;
+                        var max = genreSolutions.NextSolution.Take(amount)
+                            .Max(s => int.Parse(GetVariableByName(s, "Rate")));
+                        var recommendation = genreSolutions.NextSolution.Take(amount).FirstOrDefault(s => int.Parse(GetVariableByName(s, "Rate")) == max);
+                        response = $"I know that {username} favorite genre is {userPreferenceGenre}. That is why this book will be great: \n Name: '{GetVariableByName(recommendation, "BookName")}' \n " +
+                                $"Author: {GetVariableByName(recommendation, "BookAuthor")} \n Rate: {GetVariableByName(recommendation, "Rate")}";
+                    }
+                    else
+                    {
+                        genreSolutions = _prologEngine.GetAllSolutions(null, $"book(BookName, BookAuthor, Rate, Genre).");
+                        if (genreSolutions.Success)
+                        {
+                            var amount = genreSolutions.NextSolution.Count() == 1 ? 1 : genreSolutions.NextSolution.Count() - 1;
+                            var max = genreSolutions.NextSolution.Take(amount)
+                                .Max(s => int.Parse(GetVariableByName(s, "Rate")));
+                            var recommendation = genreSolutions.NextSolution.Take(amount).FirstOrDefault(s => int.Parse(GetVariableByName(s, "Rate")) == max);
+
+                            response = $"I couldn't find any {userPreferenceGenre} books. But I can advice this book: \n Name: '{GetVariableByName(recommendation, "BookName")}' \n " +
+                                    $"Author: {GetVariableByName(recommendation, "BookAuthor")} \n Rate: {GetVariableByName(recommendation, "Rate")}";
+                        }
+                    }
+                }
+            }
+            return response;
+        }
 
         private string GetVariableByName(Solution solution, string name)
         {

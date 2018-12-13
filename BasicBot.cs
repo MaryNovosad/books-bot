@@ -33,6 +33,7 @@ namespace Microsoft.BotBuilderSamples
         public const string TellGenresOfBooks = "TellGenresOfBooks";
         public const string TellIfBookIsWorthReading = "TellIfBookIsWorthReading"; 
         public const string TellIfAuthorIsVeryFamous = "TellIfAuthorIsVeryFamous";
+        public const string RecommendBookByPreference = "RecommendBookByPreference";
 
         /// <summary>
         /// Key in the bot config (.bot file) for the LUIS instance.
@@ -167,6 +168,10 @@ namespace Microsoft.BotBuilderSamples
                                 case AskToRecommendBook:
                                     luisResults.Entities.TryGetValue("Genre", out var genre);
                                     await turnContext.SendActivityAsync(_prologBookService.RecommendBook(genre?.First().First().ToString()));
+                                    break;
+                                case RecommendBookByPreference:
+                                    luisResults.Entities.TryGetValue("UserName", out var username);
+                                    await turnContext.SendActivityAsync(_prologBookService.RecommendBookByPreference(username.First().ToString()));
                                     break;
                                 case TellAuthorOfSpecificBook:
                                     var bookname = luisResults.Entities["BookName"].First().ToString().Trim('\'');
